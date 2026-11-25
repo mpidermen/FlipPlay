@@ -29,11 +29,11 @@ class MediaController extends Controller
     }
 
     // Menampilkan detail satu media
-    public function show(Media $medium)
+    public function show(Media $media)
     {
-        $medium->load('users');
+        $media->load('users');
 
-        return new MediaResource($medium);
+        return new MediaResource($media);
     }
 
     // Menambahkan media
@@ -47,17 +47,17 @@ class MediaController extends Controller
     }
 
     // Mengubah media
-    public function update(UpdateMediaRequest $request, Media $medium)
+    public function update(UpdateMediaRequest $request, Media $media)
     {
-        $medium->update($request->validated());
+        $media->update($request->validated());
 
-        return new MediaResource($medium);
+        return new MediaResource($media);
     }
 
     // Menghapus media
-    public function destroy(Media $medium)
+    public function destroy(Media $media)
     {
-        $medium->delete();
+        $media->delete();
 
         return response()->json([
             'message' => 'Media berhasil dihapus'
@@ -65,13 +65,19 @@ class MediaController extends Controller
     }
 
     // Menambahkan media ke koleksi user
-    public function addToCollection(User $user, Media $medium)
+    public function addToCollection(User $user, Media $media)
     {
-        $user->media()->syncWithoutDetaching([$medium->id]);
+        if ($user->media()->where('media.id', $media->id)->exists()) {
+            return response()->json([
+                'message' => 'Media sudah ada di koleksi pengguna'
+            ], 409);
+        }
+
+        $user->media()->attach($media->id);
 
         return response()->json([
-            'message' => 'Media berhasil ditambahkan ke koleksi',
-        ]);
+            'message' => 'Media berhasil ditambahkan ke koleksi'
+        ], 201);
     }
 
     // Menampilkan koleksi user
@@ -83,12 +89,12 @@ class MediaController extends Controller
     }
 
     // Menghapus media dari koleksi user
-    public function removeFromCollection(User $user, Media $medium)
+    public function removeFromCollection(User $user, Media $media)
     {
-        $user->media()->detach($medium->id);
+        $user->media()->detach($media->id);
 
         return response()->json([
-            'message' => 'Media berhasil dihapus dari koleksi',
+            'message' => 'Media berhasil dihapus dari koleksi'
         ]);
     }
 }

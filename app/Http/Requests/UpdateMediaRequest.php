@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
 class UpdateMediaRequest extends FormRequest
 {
     public function authorize(): bool
@@ -14,7 +14,13 @@ class UpdateMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'sometimes|required|string|max:255',
+            'title' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('media', 'title')->ignore($this->route('media')),
+            ],
             'type' => 'sometimes|required|in:movie,series',
             'genre' => 'sometimes|required|string|max:100',
             'release_year' => 'sometimes|required|integer|min:1888|max:' . date('Y'),

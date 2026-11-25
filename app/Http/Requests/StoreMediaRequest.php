@@ -14,7 +14,7 @@ class StoreMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:255|unique:media,title',
             'type' => 'required|in:movie,series',
             'genre' => 'required|string|max:100',
             'release_year' => 'required|integer|min:1888|max:' . date('Y'),
